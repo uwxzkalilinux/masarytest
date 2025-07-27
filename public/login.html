@@ -31,12 +31,13 @@
   </div>
 
   <script>
+    // إعداد Supabase
     const supabase = supabase.createClient(
       'https://xioxpdhdsphtclicicyn.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhpb3hwZGhkc3BodGNsaWNpY3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM1NTcwNTAsImV4cCI6MjA2OTEzMzA1MH0.Pjb0J22RJTS0mC1EYmiH4k45JHlHO-9Pksf_y-c_H-g'
     );
 
-    // بصمة الجهاز
+    // توليد بصمة للجهاز
     function getDeviceFingerprint() {
       return navigator.userAgent + " | " + navigator.platform;
     }
@@ -52,7 +53,7 @@
         .eq('device_info', device);
 
       if (error) {
-        console.error("خطأ في جلب الأجهزة:", error);
+        console.error("❌ خطأ في جلب الأجهزة:", error);
         return;
       }
 
@@ -64,16 +65,16 @@
           .insert([{ user_id: userId, device_info: device }]);
 
         if (insertError) {
-          console.error("فشل حفظ الجهاز:", insertError);
+          console.error("❌ فشل حفظ الجهاز:", insertError);
         } else {
           console.log("✅ جهاز جديد تم حفظه");
         }
       } else {
-        console.log("✅ نفس الجهاز");
+        console.log("✅ الجهاز معروف ومخزن مسبقاً");
       }
     }
 
-    // تسجيل الدخول
+    // تنفيذ تسجيل الدخول
     document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
@@ -86,17 +87,17 @@
       });
 
       if (error) {
-        alert("خطأ في تسجيل الدخول: " + error.message);
+        console.error("❌ تفاصيل الخطأ:", error);
+        alert("⚠️ خطأ في تسجيل الدخول: " + error.message);
         return;
       }
 
       const user = data.user;
-      console.log("تم تسجيل الدخول:", user.email);
+      console.log("✅ تم تسجيل الدخول:", user.email);
 
-      // التحقق من الجهاز
       await checkDevice(user.id);
 
-      // انتقل إلى الصفحة الرئيسية
+      // حفظ الجلسة والانتقال
       localStorage.setItem("isLoggedIn", "true");
       window.location.href = "index.html";
     });
