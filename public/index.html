@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trip Information Search</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600&display=swap" rel="stylesheet">
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start py-10 px-4 text-white">
   <div class="w-full max-w-4xl mx-auto text-center mb-6">
@@ -13,20 +13,57 @@
     <button onclick="logout()" class="mt-4 bg-red-600 hover:bg-red-700 text-white py-2 px-6 rounded-xl shadow-lg transition transform hover:scale-105">Logout</button>
   </div>
 
+  <div class="w-full bg-black bg-opacity-50 p-8 rounded-3xl shadow-2xl backdrop-blur-md">
+    <input id="uniqueId" class="w-full border-2 border-green-400 rounded-xl px-5 py-3 text-lg text-black mb-4" placeholder="🔢 Enter unique number">
+    <button onclick="fetchData()" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-2xl text-lg font-semibold shadow-lg"> 🚀 Search </button>
+    <div class="radar">
+      <div class="radar-sweep" id="radarSweep"></div>
+    </div>
+  </div>
+
+  <div id="stats" class="text-center mt-6 text-lg font-semibold"></div>
+  <div class="grid md:grid-cols-2 gap-6 mt-10 w-full">
+    <div class="bg-white text-black rounded-3xl shadow-xl p-6" id="withoutSonarColumn">
+      <h2 class="text-2xl font-extrabold text-red-600 mb-4">Without Sonar</h2>
+    </div>
+    <div class="bg-white text-black rounded-3xl shadow-xl p-6" id="withSonarColumn">
+      <h2 class="text-2xl font-extrabold text-green-600 mb-4">With Sonar</h2>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script type="module">
     const SUPABASE_URL = "https://db.vmvjgwnnlpyucwsvpsso.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtdmpnd25ubHB5dWN3c3Zwc3NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2NjYzOTcsImV4cCI6MjA3MjI0MjM5N30.MVt07pKOkyx2nkBeLNhOPcGUcV-hZvwA_VD7YFEatYM";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtdmpnd25ubHB5c..."; // نفس المفتاح
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // التحقق من الجلسة
     document.addEventListener('DOMContentLoaded', async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) window.location.href = 'login.html';
+      if (!session) window.location.href = "login.html";
     });
 
     async function logout() {
       await supabase.auth.signOut();
-      window.location.href = 'login.html';
+      window.location.href = "login.html";
+    }
+
+    async function fetchData() {
+      const uniqueId = document.getElementById("uniqueId").value.trim();
+      if (!uniqueId) { alert("ادخل الرقم الموحد"); return; }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session.user.id;
+
+      // تسجيل البحث في Supabase (اختياري)
+      await supabase.from('user_searches').insert({ user_id: userId, unique_number: uniqueId });
+
+      // استدعاء API proxy
+      try {
+        const res = await fetch(`/api/proxy?unique=${encodeURIComponent(uniqueId)}`);
+        const data = await res.json();
+        console.log(data); // هسه ممكن تستخدمه لعرض النتائج
+      } catch(err) { console.error(err); }
     }
   </script>
 </body>
