@@ -33,6 +33,11 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZtdmpnd25ubHB5dWN3c3Zwc3NvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY2NjYzOTcsImV4cCI6MjA3MjI0MjM5N30.MVt07pKOkyx2nkBeLNhOPcGUcV-hZvwA_VD7YFEatYM";
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Sign out أي جلسة قديمة
+      await supabase.auth.signOut();
+    });
+
     async function login() {
       const email = document.getElementById('username').value.trim();
       const password = document.getElementById('password').value.trim();
@@ -48,15 +53,9 @@
       if (error) {
         errorBox.textContent = '❌ ' + error.message;
       } else {
-        localStorage.setItem('isLoggedIn', 'true');
         window.location.href = 'index.html';
       }
     }
-
-    document.addEventListener('DOMContentLoaded', async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) window.location.href = 'index.html';
-    });
   </script>
 </body>
 </html>
